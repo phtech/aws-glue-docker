@@ -1,5 +1,8 @@
 from zenika/alpine-maven:3
 
+LABEL version="0.9"
+LABEL description="Docker file for unit testing glue pyspark builds"
+
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV SPARK_URL https://aws-glue-etl-artifacts.s3.amazonaws.com/glue-1.0/spark-2.4.3-bin-hadoop2.8.tgz
@@ -22,6 +25,8 @@ RUN git clone --depth 1 https://github.com/pyenv/pyenv.git $PYENV_ROOT && \
 
 RUN wget $SPARK_URL && tar -xzf *.tgz && rm *.tgz
 
+RUN pip install boto3 pytest
+
 RUN git clone https://github.com/awslabs/aws-glue-libs $GLUE_HOME && \
     # Checking out current head of Glue 1.0 branch
     cd $GLUE_HOME && git checkout 4f6ac89
@@ -29,7 +34,6 @@ RUN git clone https://github.com/awslabs/aws-glue-libs $GLUE_HOME && \
 RUN mvn -f $GLUE_HOME/pom.xml -DoutputDirectory=$GLUE_HOME/jars dependency:copy-dependencies
 
 # Bodge (https://github.com/awslabs/aws-glue-libs/issues/25)
-RUN rm $GLUE_HOME/jars/netty-* $GLUE_HOME/jars/javax.servlet-3.* && \
-    echo -n "spark.driver.extraClassPath $GLUE_HOME/jars/*" > $SPARK_HOME/conf/spark-defaults.conf
+RUN echo -n "spark.driver.extraClassPath $GLUE_HOME/jars/*" > $SPARK_HOME/conf/spark-defaults.conf
 
 WORKDIR /root
