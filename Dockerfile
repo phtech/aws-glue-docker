@@ -1,6 +1,8 @@
 from zenika/alpine-maven:3
 
-LABEL version="0.9"
+LABEL version="glue-1.0"
+LABEL python='3.6.9'
+LABEL pyspark='2.4.3'
 LABEL description="Docker file for unit testing glue pyspark builds"
 
 ENV LANG C.UTF-8
