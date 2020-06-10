@@ -88,7 +88,7 @@ pipeline {
           credentials.pipeline(region: 'us-west-2') {
             def login = ecrLogin()
             sh "${login}"
-            sh "docker build --build-arg JENKINS_MASTER_HOST=${env.JENKINS_URL} -t spark-glue-base:${env.BUILD_NUMBER} Linux"
+            sh "docker build --build-arg JENKINS_MASTER_HOST=${env.JENKINS_URL} -t spark-glue-base:${env.BUILD_NUMBER} ."
             sh "docker tag spark-glue-base:${env.BUILD_NUMBER} ${westECSRepoStack['RepoURI']}:${dockerImageTag}"
             sh "docker push ${westECSRepoStack['RepoURI']}:${dockerImageTag}"
           }
