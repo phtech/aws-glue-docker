@@ -1,0 +1,70 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Generic Elastic Container Repository",
+    "Parameters": {
+        "RootAccountARNList": {
+            "Description": "List of root acocunt ARNs to share this repository with. Access will only allow for pulling of images. Example:  arn:aws:iam::<aws_account_id>:root,arn:aws:iam::<aws_account_id>:root",
+            "Type": "CommaDelimitedList"
+        },
+        "RepoName": {
+            "Description": "Name of repo.",
+            "Default": "spark-glue-base",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "MyRepository": {
+            "Type": "AWS::ECR::Repository",
+            "Properties": {
+                "LifecyclePolicy": {
+                    "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"description\":\"Expire untagged images older than 3 days\",\"selection\":{\"tagStatus\":\"untagged\",\"countType\":\"sinceImagePushed\",\"countUnit\":\"days\",\"countNumber\":3},\"action\":{\"type\":\"expire\"}}]}"
+                },
+                "RepositoryName": {
+                    "Ref": "RepoName"
+                },
+                "RepositoryPolicyText": {
+                    "Version": "2008-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "AllowPull",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Ref": "RootAccountARNList"
+                                }
+                            },
+                            "Action": [
+                                "ecr:GetDownloadUrlForLayer",
+                                "ecr:BatchGetImage",
+                                "ecr:BatchCheckLayerAvailability"
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "RepoURI": {
+            "Description": "The URI to the repository. For setting up docker.",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        {
+                            "Ref": "AWS::AccountId"
+                        },
+                        ".dkr.ecr.",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com/",
+                        {
+                            "Ref": "RepoName"
+                        }
+                    ]
+                ]
+            }
+        }
+    }
+}
