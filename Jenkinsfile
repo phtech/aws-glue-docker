@@ -11,7 +11,7 @@ pipeline {
   }
   agent {
     node {
-      label 'jenkins_master'
+      label 'ecs_linux_slave'
     }
   }
   stages {
